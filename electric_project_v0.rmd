@@ -1,0 +1,79 @@
+---
+title: "Electric Project"
+author: "Caleb Waack"
+date: "2023-01-11"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Electric Project 
+
+# Overview
+
+The purpose of this analysis is build skills in R. Personally I have lots of experience in Python, and some experience in R. Although I have completed many projects in R via my masters program. I have not done any projects for fun. Which would indicate that I haven't developed the skills needed to work with messy data in R. 
+
+The goal of this analysis is:
+
+1.) What is the primary power source for each country? 
+2.) How has the primary power source changed over time? 
+3.) Who are the top 5 consumers of each energy source? 
+4.) By percent kW/hr how much renewable energy has been used by each country over the past 10 years? 
+5.) Are there any common threads in the data that indicate a transition point between renewable energy resources and fossil fuels? 
+6.) Who are the top 5 energy consumers in this data set? What are their sources? How have they changed in the past 10, 20, 30 years? 
+7.) Predicted the energy consumption for the top 10 energy consumers for the next 10 years? How do the energy sources change? 
+
+```{r,error=FALSE}
+#First create a block of code to install all of the packages
+library(readr)
+library(dplyr)
+```
+
+# Task 1:
+
+Load and familiarize yourself with the data. 
+
+We are looking to answer questions like:
+How many missing values are there for each column? How many for each country? Should we consider dropping some countries or years? 
+What is the distribution of non-missing data? Is it normal? How much does it vary year to year for the same country? Or even countries in close proximity to each other? 
+
+```{r}
+#First we load the data
+setwd('C:/Users/caleb/OneDrive/Desktop/Personal/Data Science/Personal Projects/Pair Programming/')
+data <- read_csv('World Energy Consumption.csv',show_col_types = FALSE)
+#Next calculate summary stats for each column and country. 
+```
+
+```{r}
+summary(data$country)
+length(unique(data$country))
+#this answers the number of na values in a column
+sum(is.na(data$coal_prod_change_pct))
+```
+```{r}
+v <- colnames(data)
+```
+
+
+```{r}
+for (ii in colnames(data)) {
+  print(str(ii))
+  value <- sum(is.na(data[[ii]]))
+  print(str(value))
+}
+```
+
+# Task 2
+
+We want to know the different components of energy consumption. Separate the data into two different dataframes, one for renewable energies, and the other for non-renewables. 
+```{r}
+
+```
+
+
+
+
+
+
