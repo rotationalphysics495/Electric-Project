@@ -41,7 +41,7 @@ What is the distribution of non-missing data? Is it normal? How much does it var
 
 ```{r}
 #First we load the data
-setwd('C:/Users/caleb/OneDrive/Desktop/Personal/Data Science/Personal Projects/Pair Programming/')
+setwd('~/GitHub/Electric-Project/')
 data <- read_csv('World Energy Consumption.csv',show_col_types = FALSE)
 #Next calculate summary stats for each column and country. 
 ```
@@ -52,18 +52,33 @@ length(unique(data$country))
 #this answers the number of na values in a column
 sum(is.na(data$coal_prod_change_pct))
 ```
-```{r}
-v <- colnames(data)
-```
 
+```{r,echo=FALSE}
+# for (ii in colnames(data)) {
+#   print(str(ii))
+#   value <- sum(is.na(data[[ii]]))
+#   print(str(value))
+# }
 
-```{r}
-for (ii in colnames(data)) {
-  print(str(ii))
-  value <- sum(is.na(data[[ii]]))
-  print(str(value))
+# remove all na values from the data
+# data <- data %>%
+#   na.exclude()
+
+for (ii in colnames(data)){
+  data <- data %>%
+    filter(!is.na(ii))
 }
 ```
+Basic visuals:
+-Histogram is something that I use in almost every analysis
+-It tells us how widely the data is distributed, and if the data is skewed or not
+```{r}
+library(ggplot2)
+
+ggplot(data, aes(x=coal_prod_change_pct)) + geom_histogram()
+
+```
+
 
 # Task 2
 
