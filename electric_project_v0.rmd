@@ -29,6 +29,8 @@ The goal of this analysis is:
 #First create a block of code to install all of the packages
 library(readr)
 library(dplyr)
+library(imputeTS)
+library(ggplot2)
 ```
 
 # Task 1:
@@ -60,24 +62,65 @@ sum(is.na(data$coal_prod_change_pct))
 #   print(str(value))
 # }
 
-# remove all na values from the data
+#remove all na values from the data
 # data <- data %>%
 #   na.exclude()
 
-for (ii in colnames(data)){
-  data <- data %>%
-    filter(!is.na(ii))
-}
+# for (ii in colnames(data)){
+#   data <- data %>%
+#     filter(!is.na(ii))
+# }
+
+# data <- na_replace(data,0)
 ```
+Filter the data by the large groupings, keep in mind there are "other countries"
+
+```{r,echo=FALSE}
+unique(data$country)
+#Asia Pacific, Africa, North America, Europe, South & Central America
+```
+Create continents list
+
+```{r,echo=FALSE}
+continents <- list('Asia Pacific'
+               , 'Africa'
+               , 'North America'
+               , 'Europe'
+               ,'South & Central America')
+```
+Filter on continents list
+Filter on year
+
+```{r,echo=FALSE}
+# continents_data <- filter(data, country %in% continents)
+# continents_data <- filter(continents_data, year >= 1950)
+
+continents_data <- data %>%
+  filter(country %in% continents) %>%
+  filter(year >=1950)
+
+head(continents_data,10)
+```
+
+
 Basic visuals:
 -Histogram is something that I use in almost every analysis
 -It tells us how widely the data is distributed, and if the data is skewed or not
 ```{r}
-library(ggplot2)
 
-ggplot(data, aes(x=coal_prod_change_pct)) + geom_histogram()
+ggplot(continents_data, aes(x=coal_prod_change_twh)) + geom_histogram()
 
 ```
+```{r}
+count(continents_data,coal_prod_change_twh,sort=TRUE)
+```
+```{r}
+# continents_data <- filter(continents_data,country=='North America')
+ggplot(continents_data, aes(x=year,
+                            y=coal_prod_change_pct,
+                            group=country))+ geom_line(aes(color=country))
+```
+
 
 
 # Task 2
