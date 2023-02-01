@@ -18,7 +18,7 @@ The purpose of this analysis is build skills in R. Personally I have lots of exp
 The goal of this analysis is:
 
 1.) What is the primary power source for each country? 
-2.) How has the primary power source changed over time? 
+2.) How has the primary power source changed over time?
 3.) Who are the top 5 consumers of each energy source? 
 4.) By percent kW/hr how much renewable energy has been used by each country over the past 10 years? 
 5.) Are there any common threads in the data that indicate a transition point between renewable energy resources and fossil fuels? 
@@ -33,9 +33,7 @@ library(imputeTS)
 library(ggplot2)
 ```
 
-# Task 1:
-
-Load and familiarize yourself with the data. 
+# Task 1: Load and familiarize yourself with the data. 
 
 We are looking to answer questions like:
 How many missing values are there for each column? How many for each country? Should we consider dropping some countries or years? 
@@ -123,15 +121,37 @@ ggplot(continents_data, aes(x=year,
 
 
 
-# Task 2
-
-We want to know the different components of energy consumption. Separate the data into two different dataframes, one for renewable energies, and the other for non-renewables. 
+# Task 2: We want to know the different components of energy consumption. Separate the data into two different dataframes, one for renewable energies, and the other for non-renewables. 
 ```{r}
 
 ```
 
+# Task 3: Who are the top 5 consumers of each energy source?
+```{r}
 
+```
 
+# Task 4: By percent kW/hr how much renewable energy has been used by each country over the past 10 years?
+```{r}
 
+```
 
+# Task 5: Are there any common threads in the data that indicate a transition point between renewable energy resources and fossil fuels? 
+```{r}
+
+```
+# Task 6: Who are the top 5 energy consumers in this data set? What are their sources? How have they changed in the past 10, 20, 30 years?
+```{r}
+
+```
+
+# Task 7: Predicted the energy consumption for the top 10 energy consumers for the next 10 years? How do the energy sources change?
+```{r}
+
+```
+
+# Task 8: Which countries have similar energy consumption habits? Use unsupervised learning to segment the countries into 3 groups.
+```{r}
+
+```
 
