@@ -90,6 +90,11 @@ Filter on continents list
 Filter on year
 
 ```{r,echo=FALSE}
+# filter function works like
+# filter(dataset_name,column1==value,column2 >= value)
+# you can put as filter on as many columns as you want
+
+
 # continents_data <- filter(data, country %in% continents)
 # continents_data <- filter(continents_data, year >= 1950)
 
@@ -123,17 +128,22 @@ ggplot(continents_data, aes(x=year,
 
 # Task 2: We want to know the different components of energy consumption. Separate the data into two different dataframes, one for renewable energies, and the other for non-renewables. 
 ```{r}
-
+# select dplyr function
+# select(dataset_name, column1, column2,column_n)
 ```
 
 # Task 3: Who are the top 5 consumers of each energy source?
 ```{r}
+# arrange dplyr function
+# arrange(dataset_name, col1,col2, col_n)
+# default order is asc, to change to desc use the desc function, i.e. desc(col_n)
 
 ```
 
 # Task 4: By percent kW/hr how much renewable energy has been used by each country over the past 10 years?
 ```{r}
-
+# mutate dplyr function
+# mutate(dataset_name, new_col = col1 - col2)
 ```
 
 # Task 5: Are there any common threads in the data that indicate a transition point between renewable energy resources and fossil fuels? 
@@ -142,7 +152,9 @@ ggplot(continents_data, aes(x=year,
 ```
 # Task 6: Who are the top 5 energy consumers in this data set? What are their sources? How have they changed in the past 10, 20, 30 years?
 ```{r}
-
+# summarise dplyr function
+# summarise(dataset_name, col=function(column))
+# summarise(dataset_name, new_col=sum(col1))
 ```
 
 # Task 7: Predicted the energy consumption for the top 10 energy consumers for the next 10 years? How do the energy sources change?
