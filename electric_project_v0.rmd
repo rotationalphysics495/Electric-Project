@@ -130,13 +130,67 @@ ggplot(continents_data, aes(x=year,
 ```{r}
 # select dplyr function
 # select(dataset_name, column1, column2,column_n)
+columns <- colnames(continents_data)
+
+renewables <- select(continents_data,
+                     country,
+                     year,
+                     columns[101:107],
+                     columns[91:97],
+                     population)
+
+nonrenewables <- select(continents_data,
+                        country,
+                        year,
+                        columns[4:9],
+                        columns[20:28],
+                        columns[44:59],
+                        columns[82:90],
+                        population)
 ```
 
-# Task 3: Who are the top 5 consumers of each energy source?
+# Task 3: Who are the top 5 consumers of renewable non-renewable energy source?
 ```{r}
 # arrange dplyr function
 # arrange(dataset_name, col1,col2, col_n)
 # default order is asc, to change to desc use the desc function, i.e. desc(col_n)
+head(arrange(renewables,desc(renewables_share_energy)))
+
+renewables_sorted <- renewables %>%
+  select(country,year,renewables_share_energy) %>%
+  group_by(country) %>%
+  mutate(avg_renewables = mean(renewables_share_energy,na.rm = TRUE)) %>%
+  select(country,avg_renewables) %>%
+  summarise(avg_renewables = mean(avg_renewables,na.rm = TRUE,.groups=country)) %>%
+  arrange(desc(avg_renewables))
+  
+
+head(renewables_sorted)
+```
+
+
+```{r}
+summary(filter(renewables,country=='Europe'))
+
+ggplot(data = filter(renewables,country=='Europe'),
+       aes(x=year,y=renewables_share_energy)) + geom_col(fill='blue',color='black') + labs(title='Europe Energy Renewable Energy Share')
+
+ggplot(data = filter(renewables,country=='Africa'),
+       aes(x=year,y=renewables_share_energy)) + geom_col(fill='red',color='black') + labs(title='Africa Energy Renewable Energy Share')
+
+ggplot(data=filter(renewables,country=='North America'),
+       aes(x=year,y=renewables_share_energy)) + geom_col(fill='purple',color='black') +
+  labs(title='North America Renewable Energy Share')
+
+ggplot(data=filter(renewables,country=='South & Central America'),
+       aes(x=year,y=renewables_share_energy)) + geom_col(fill='orange',color='black') +
+  labs(title='South & Central America Renewable Energy Share')
+
+ggplot(data=filter(renewables,country=='Asia Pacific'),
+       aes(x=year,y=renewables_share_energy)) + geom_col(fill='green',color='black') +
+  labs(title='Asia Pacific Renewable Energy Share')
+
+
 
 ```
 
@@ -146,7 +200,7 @@ ggplot(continents_data, aes(x=year,
 # mutate(dataset_name, new_col = col1 - col2)
 ```
 
-# Task 5: Are there any common threads in the data that indicate a transition point between renewable energy resources and fossil fuels? 
+# Task 5: Are there any common threads in the data that indicate a transition point between renewable energy resources and fossil fuels? At what population, energy per capita, or energy per gdp do we see a transition to renewables? 
 ```{r}
 
 ```
@@ -157,12 +211,12 @@ ggplot(continents_data, aes(x=year,
 # summarise(dataset_name, new_col=sum(col1))
 ```
 
-# Task 7: Predicted the energy consumption for the top 10 energy consumers for the next 10 years? How do the energy sources change?
+# Task 7: Predict the energy consumption for the top 5 energy consumers for the next 10 years? How do the energy sources change? Predict only the top energy sources in the data.
 ```{r}
 
 ```
 
-# Task 8: Which countries have similar energy consumption habits? Use unsupervised learning to segment the countries into 3 groups.
+# Task 8: Which countries have similar energy consumption habits over the past 20 years? Use unsupervised learning to segment the countries into logical groups. How many groups are there?
 ```{r}
 
 ```
