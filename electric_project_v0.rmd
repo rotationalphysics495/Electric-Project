@@ -164,7 +164,6 @@ renewables_sorted <- renewables %>%
   summarise(avg_renewables = mean(avg_renewables,na.rm = TRUE,.groups=country)) %>%
   arrange(desc(avg_renewables))
   
-
 head(renewables_sorted)
 ```
 
@@ -198,26 +197,78 @@ ggplot(data=filter(renewables,country=='Asia Pacific'),
 ```{r}
 # mutate dplyr function
 # mutate(dataset_name, new_col = col1 - col2)
+renewables <- renewables %>%
+  filter(year>=2009) %>%
+  mutate(total_renewables = renewables_share_elec + other_renewables_share_elec)
+
+renewables_sorted <- renewables %>%
+  select(country,year,renewables_share_energy) %>%
+  group_by(country) %>%
+  mutate(avg_renewables = mean(renewables_share_energy,na.rm = TRUE)) %>%
+  select(country,avg_renewables) %>%
+  summarise(avg_renewables = mean(avg_renewables,na.rm = TRUE,.groups=country)) %>%
+  arrange(desc(avg_renewables))
+
+head(renewables_sorted)
+
 ```
 
-# Task 5: Are there any common threads in the data that indicate a transition point between renewable energy resources and fossil fuels? At what population, energy per capita, or energy per gdp do we see a transition to renewables? 
+# Task 5: Are there any common threads in the data that indicate a transition point between renewable energy resources and fossil fuels? At what population, energy per capita, or energy per gdp do we see a transition to renewables? Descriptive
 ```{r}
 
 ```
-# Task 6: Who are the top 5 energy consumers in this data set? What are their sources? How have they changed in the past 10, 20, 30 years?
+# Task 6: Who are the top 5 energy consumers in this data set? What are their sources? How have they changed in the past 10, 20, 30 years? Descriptive
 ```{r}
 # summarise dplyr function
 # summarise(dataset_name, col=function(column))
 # summarise(dataset_name, new_col=sum(col1))
 ```
 
-# Task 7: Predict the energy consumption for the top 5 energy consumers for the next 10 years? How do the energy sources change? Predict only the top energy sources in the data.
+# Task 7: Predict the energy consumption for the top 5 energy consumers for the next 10 years? How do the energy sources change? Predict only the top energy sources in the data. Predictive Time Series
 ```{r}
 
 ```
 
-# Task 8: Which countries have similar energy consumption habits over the past 20 years? Use unsupervised learning to segment the countries into logical groups. How many groups are there?
+# Task 8: Which countries have similar energy consumption habits over the past 20 years? Use unsupervised learning to segment the countries into logical groups. How many groups are there? Predicitve / Descriptive Segmentation
 ```{r}
+# unique(continents_data$country)
+# 
+# unique(data$country)
 
+# data <- data %>%
+#   filter(year >= (max(data$year)-20))
+
+# Commented out the code above because it was already filtered. 
+
+countries_list <- list('United States',
+                       'Austria',
+                       'Canada',
+                       'Norway',
+                       'France',
+                       'Germany',
+                       'Portugal',
+                       'Hong Kong',
+                       'China',
+                       'Australia',
+                       'New Zealand',
+                       'Thailand',
+                       'Japan',
+                       'Cameroon',
+                       'Egypt',
+                       'Djibouti',
+                       'Honduras',
+                       'Brazil')
+
+countries_data <- data %>%
+  filter(country %in% countries_list)
+
+# Quick validation that we have the right number of unique values
+length(unique(countries_data$country))
+
+```
+```{r}
+summary(countries_data)
+
+# filter through dataset by number of na values greater than 30% of the data
 ```
 
