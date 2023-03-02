@@ -1,0 +1,290 @@
+---
+title: "Electric Project"
+author: "Caleb Waack"
+date: "2023-01-11"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Electric Project 
+
+# Overview
+
+The purpose of this analysis is build skills in R. Personally I have lots of experience in Python, and some experience in R. Although I have completed many projects in R via my masters program. I have not done any projects for fun. Which would indicate that I haven't developed the skills needed to work with messy data in R. 
+
+The goal of this analysis is:
+
+1.) What is the primary power source for each country? 
+2.) How has the primary power source changed over time?
+3.) Who are the top 5 consumers of each energy source? 
+4.) By percent kW/hr how much renewable energy has been used by each country over the past 10 years? 
+5.) Are there any common threads in the data that indicate a transition point between renewable energy resources and fossil fuels? 
+6.) Who are the top 5 energy consumers in this data set? What are their sources? How have they changed in the past 10, 20, 30 years? 
+7.) Predicted the energy consumption for the top 10 energy consumers for the next 10 years? How do the energy sources change? 
+
+```{r,error=FALSE}
+#First create a block of code to install all of the packages
+library(readr)
+library(dplyr)
+library(imputeTS)
+library(ggplot2)
+```
+
+# Task 1: Load and familiarize yourself with the data. 
+
+We are looking to answer questions like:
+How many missing values are there for each column? How many for each country? Should we consider dropping some countries or years? 
+What is the distribution of non-missing data? Is it normal? How much does it vary year to year for the same country? Or even countries in close proximity to each other? 
+
+```{r}
+#First we load the data
+setwd('~/GitHub/Electric-Project/')
+data <- read_csv('World Energy Consumption.csv',show_col_types = FALSE)
+#Next calculate summary stats for each column and country. 
+```
+
+```{r}
+summary(data$country)
+length(unique(data$country))
+#this answers the number of na values in a column
+sum(is.na(data$coal_prod_change_pct))
+```
+
+```{r,echo=FALSE}
+# for (ii in colnames(data)) {
+#   print(str(ii))
+#   value <- sum(is.na(data[[ii]]))
+#   print(str(value))
+# }
+
+#remove all na values from the data
+# data <- data %>%
+#   na.exclude()
+
+# for (ii in colnames(data)){
+#   data <- data %>%
+#     filter(!is.na(ii))
+# }
+
+# data <- na_replace(data,0)
+```
+Filter the data by the large groupings, keep in mind there are "other countries"
+
+```{r,echo=FALSE}
+unique(data$country)
+#Asia Pacific, Africa, North America, Europe, South & Central America
+```
+Create continents list
+
+```{r,echo=FALSE}
+continents <- list('Asia Pacific'
+               , 'Africa'
+               , 'North America'
+               , 'Europe'
+               ,'South & Central America')
+```
+Filter on continents list
+Filter on year
+
+```{r,echo=FALSE}
+# filter function works like
+# filter(dataset_name,column1==value,column2 >= value)
+# you can put as filter on as many columns as you want
+
+
+# continents_data <- filter(data, country %in% continents)
+# continents_data <- filter(continents_data, year >= 1950)
+
+continents_data <- data %>%
+  filter(country %in% continents) %>%
+  filter(year >=1950)
+
+head(continents_data,10)
+```
+
+
+Basic visuals:
+-Histogram is something that I use in almost every analysis
+-It tells us how widely the data is distributed, and if the data is skewed or not
+```{r}
+
+ggplot(continents_data, aes(x=coal_prod_change_twh)) + geom_histogram()
+
+```
+```{r}
+count(continents_data,coal_prod_change_twh,sort=TRUE)
+```
+```{r}
+# continents_data <- filter(continents_data,country=='North America')
+ggplot(continents_data, aes(x=year,
+                            y=coal_prod_change_pct,
+                            group=country))+ geom_line(aes(color=country))
+```
+
+
+
+# Task 2: We want to know the different components of energy consumption. Separate the data into two different dataframes, one for renewable energies, and the other for non-renewables. 
+```{r}
+# select dplyr function
+# select(dataset_name, column1, column2,column_n)
+columns <- colnames(continents_data)
+
+renewables <- select(continents_data,
+                     country,
+                     year,
+                     columns[101:107],
+                     columns[91:97],
+                     population)
+
+nonrenewables <- select(continents_data,
+                        country,
+                        year,
+                        columns[4:9],
+                        columns[20:28],
+                        columns[44:59],
+                        columns[82:90],
+                        population)
+```
+
+# Task 3: Who are the top 5 consumers of renewable non-renewable energy source?
+```{r}
+# arrange dplyr function
+# arrange(dataset_name, col1,col2, col_n)
+# default order is asc, to change to desc use the desc function, i.e. desc(col_n)
+head(arrange(renewables,desc(renewables_share_energy)))
+
+renewables_sorted <- renewables %>%
+  select(country,year,renewables_share_energy) %>%
+  group_by(country) %>%
+  mutate(avg_renewables = mean(renewables_share_energy,na.rm = TRUE)) %>%
+  select(country,avg_renewables) %>%
+  summarise(avg_renewables = mean(avg_renewables,na.rm = TRUE,.groups=country)) %>%
+  arrange(desc(avg_renewables))
+  
+head(renewables_sorted)
+```
+
+
+```{r}
+summary(filter(renewables,country=='Europe'))
+
+ggplot(data = filter(renewables,country=='Europe'),
+       aes(x=year,y=renewables_share_energy)) + geom_col(fill='blue',color='black') + labs(title='Europe Energy Renewable Energy Share')
+
+ggplot(data = filter(renewables,country=='Africa'),
+       aes(x=year,y=renewables_share_energy)) + geom_col(fill='red',color='black') + labs(title='Africa Energy Renewable Energy Share')
+
+ggplot(data=filter(renewables,country=='North America'),
+       aes(x=year,y=renewables_share_energy)) + geom_col(fill='purple',color='black') +
+  labs(title='North America Renewable Energy Share')
+
+ggplot(data=filter(renewables,country=='South & Central America'),
+       aes(x=year,y=renewables_share_energy)) + geom_col(fill='orange',color='black') +
+  labs(title='South & Central America Renewable Energy Share')
+
+ggplot(data=filter(renewables,country=='Asia Pacific'),
+       aes(x=year,y=renewables_share_energy)) + geom_col(fill='green',color='black') +
+  labs(title='Asia Pacific Renewable Energy Share')
+
+
+
+```
+
+# Task 4: By percent kW/hr how much renewable energy has been used by each country over the past 10 years?
+```{r}
+# mutate dplyr function
+# mutate(dataset_name, new_col = col1 - col2)
+renewables <- renewables %>%
+  filter(year>=2009) %>%
+  mutate(total_renewables = renewables_share_elec + other_renewables_share_elec)
+
+renewables_sorted <- renewables %>%
+  select(country,year,renewables_share_energy) %>%
+  group_by(country) %>%
+  mutate(avg_renewables = mean(renewables_share_energy,na.rm = TRUE)) %>%
+  select(country,avg_renewables) %>%
+  summarise(avg_renewables = mean(avg_renewables,na.rm = TRUE,.groups=country)) %>%
+  arrange(desc(avg_renewables))
+
+head(renewables_sorted)
+
+```
+
+# Task 5: Are there any common threads in the data that indicate a transition point between renewable energy resources and fossil fuels? At what population, energy per capita, or energy per gdp do we see a transition to renewables? Descriptive
+```{r}
+
+```
+# Task 6: Who are the top 5 energy consumers in this data set? What are their sources? How have they changed in the past 10, 20, 30 years? Descriptive
+```{r}
+# summarise dplyr function
+# summarise(dataset_name, col=function(column))
+# summarise(dataset_name, new_col=sum(col1))
+```
+
+# Task 7: Predict the energy consumption for the top 5 energy consumers for the next 10 years? How do the energy sources change? Predict only the top energy sources in the data. Predictive Time Series
+```{r}
+
+```
+
+# Task 8: Which countries have similar energy consumption habits over the past 20 years? Use unsupervised learning to segment the countries into logical groups. How many groups are there? Predicitve / Descriptive Segmentation
+```{r}
+# unique(continents_data$country)
+# 
+# unique(data$country)
+
+ data <- data %>%
+  filter(year >= (max(data$year)-20))
+
+# Commented out the code above because it was already filtered. 
+
+countries_list <- list('United States',
+                       'Austria',
+                       'Canada',
+                       'Norway',
+                       'France',
+                       'Germany',
+                       'Portugal',
+                       'Hong Kong',
+                       'China',
+                       'Australia',
+                       'New Zealand',
+                       'Thailand',
+                       'Japan',
+                       'Cameroon',
+                       'Egypt',
+                       'Djibouti',
+                       'Honduras',
+                       'Brazil')
+
+countries_data <- data %>%
+  filter(country %in% countries_list)
+
+# Quick validation that we have the right number of unique values
+length(unique(countries_data$country))
+
+```
+```{r}
+summary(countries_data)
+
+# filter through dataset by number of na values greater than 30% of the data
+```
+```{r}
+filter_cols <- list('country','year')
+
+for (v in colnames(countries_data)) {
+    if (endsWith(v, 'per_capita') == TRUE) {
+      filter_cols <- append (filter_cols,v)
+    }
+}
+
+```
+
+```{r}
+countries_data <- countries_data %>%
+  select(all_of(filter_cols))
+  
+```
+
