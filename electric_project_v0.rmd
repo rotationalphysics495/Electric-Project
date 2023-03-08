@@ -232,11 +232,11 @@ head(renewables_sorted)
 # Task 8: Which countries have similar energy consumption habits over the past 20 years? Use unsupervised learning to segment the countries into logical groups. How many groups are there? Predicitve / Descriptive Segmentation
 ```{r}
 # unique(continents_data$country)
-# 
+#
 # unique(data$country)
 
-# data <- data %>%
-#   filter(year >= (max(data$year)-20))
+ data <- data %>%
+   filter(year >= (max(data$year)-20))
 
 # Commented out the code above because it was already filtered. 
 
@@ -271,4 +271,86 @@ summary(countries_data)
 
 # filter through dataset by number of na values greater than 30% of the data
 ```
+
+```{r}
+filter_cols <- list('country','year')
+
+for (v in colnames(countries_data)) {
+  if (endsWith(v,'per_capita') == TRUE) {
+    filter_cols <- append(filter_cols,v)
+  }
+}
+
+filter_cols <- unlist(filter_cols)
+```
+
+
+```{r}
+countries_data <- countries_data %>%
+  select(filter_cols)
+```
+
+```{r}
+scaled_data <- as.data.frame(scale(countries_data%>%select(-country,-year)))
+
+scaled_data[is.na(scaled_data)] <- 0
+```
+
+```{r}
+cluster <- kmeans(scaled_data, 3)
+
+kmeans(scaled_data,3)
+```
+
+```{r}
+countries_data <- countries_data %>%
+  mutate(class = cluster$cluster)
+```
+
+
+```{r}
+
+ggplot(aes(x=renewables_energy_per_capita, y=energy_per_capita,col=class), data=countries_data) + geom_point()
+
+```
+
+
+```{r}
+cluster$centers
+```
+
+```{r}
+library(tidyverse)
+
+output <- map_dbl(1:10, function(k){
+  model <- kmeans(x = scaled_data, centers = k)
+  model$tot.withinss
+})
+
+# tot.withinss stands for the total within-cluster sum of squares
+
+elbow_method <- data.frame(k = 1:10,
+                           centers_values = output)
+
+ggplot(elbow_method, aes(x = k, y = centers_values)) + 
+  geom_line() + geom_point() + scale_x_continuous(breaks = 1:10)
+```
+
+```{r}
+
+library(factoextra)
+
+cluster <- kmeans(x=scaled_data, centers = 4)
+
+fviz_cluster(cluster, data = scaled_data)
+```
+
+
+
+
+
+
+
+
+
 
