@@ -280,6 +280,8 @@ for (v in colnames(countries_data)) {
     }
 }
 
+filter_cols <- unlist(filter_cols)
+
 ```
 
 ```{r}
@@ -287,4 +289,33 @@ countries_data <- countries_data %>%
   select(all_of(filter_cols))
   
 ```
+
+```{r}
+scaled_data <- as.data.frame(scale(countries_data%>%select(-country,-year)))
+
+scaled_data[is.na(scaled_data)] <- 0
+```
+
+```{r}
+cluster = kmeans(scaled_data , 3)
+
+```
+
+```{r}
+countries_data <- countries_data %>%
+  mutate(class<-(cluster$cluster))
+```
+
+```{r}
+ggplot(aes(x=country, y=year, col=class), data = countries_data) + geom_point()
+
+
+```
+
+
+
+
+
+
+
 
