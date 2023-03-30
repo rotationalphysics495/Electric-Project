@@ -25,15 +25,18 @@ The goal of this analysis is:
 6.) Who are the top 5 energy consumers in this data set? What are their sources? How have they changed in the past 10, 20, 30 years? 
 7.) Predicted the energy consumption for the top 10 energy consumers for the next 10 years? How do the energy sources change? 
 
-```{r,error=FALSE}
+```{r,error=FALSE,warning=FALSE}
 #First create a block of code to install all of the packages
 library(readr)
 library(dplyr)
 library(imputeTS)
 library(ggplot2)
+library(factoextra)
+library(tidyverse)
 ```
 
-# Task 1: Load and familiarize yourself with the data. 
+## Task 1:
+Load and familiarize yourself with the data. 
 
 We are looking to answer questions like:
 How many missing values are there for each column? How many for each country? Should we consider dropping some countries or years? 
@@ -106,7 +109,7 @@ head(continents_data,10)
 ```
 
 
-Basic visuals:
+## Basic visuals:
 -Histogram is something that I use in almost every analysis
 -It tells us how widely the data is distributed, and if the data is skewed or not
 ```{r}
@@ -126,7 +129,8 @@ ggplot(continents_data, aes(x=year,
 
 
 
-# Task 2: We want to know the different components of energy consumption. Separate the data into two different dataframes, one for renewable energies, and the other for non-renewables. 
+## Task 2:
+We want to know the different components of energy consumption. Separate the data into two different dataframes, one for renewable energies, and the other for non-renewables. 
 ```{r}
 # select dplyr function
 # select(dataset_name, column1, column2,column_n)
@@ -149,7 +153,8 @@ nonrenewables <- select(continents_data,
                         population)
 ```
 
-# Task 3: Who are the top 5 consumers of renewable non-renewable energy source?
+## Task 3:
+Who are the top 5 consumers of renewable non-renewable energy source?
 ```{r}
 # arrange dplyr function
 # arrange(dataset_name, col1,col2, col_n)
@@ -193,7 +198,8 @@ ggplot(data=filter(renewables,country=='Asia Pacific'),
 
 ```
 
-# Task 4: By percent kW/hr how much renewable energy has been used by each country over the past 10 years?
+## Task 4:
+By percent kW/hr how much renewable energy has been used by each country over the past 10 years?
 ```{r}
 # mutate dplyr function
 # mutate(dataset_name, new_col = col1 - col2)
@@ -213,23 +219,27 @@ head(renewables_sorted)
 
 ```
 
-# Task 5: Are there any common threads in the data that indicate a transition point between renewable energy resources and fossil fuels? At what population, energy per capita, or energy per gdp do we see a transition to renewables? Descriptive
+## Task 5:
+Are there any common threads in the data that indicate a transition point between renewable energy resources and fossil fuels? At what population, energy per capita, or energy per gdp do we see a transition to renewables? Descriptive
 ```{r}
 
 ```
-# Task 6: Who are the top 5 energy consumers in this data set? What are their sources? How have they changed in the past 10, 20, 30 years? Descriptive
+## Task 6:
+Who are the top 5 energy consumers in this data set? What are their sources? How have they changed in the past 10, 20, 30 years? Descriptive
 ```{r}
 # summarise dplyr function
 # summarise(dataset_name, col=function(column))
 # summarise(dataset_name, new_col=sum(col1))
 ```
 
-# Task 7: Predict the energy consumption for the top 5 energy consumers for the next 10 years? How do the energy sources change? Predict only the top energy sources in the data. Predictive Time Series
+## Task 7:
+Predict the energy consumption for the top 5 energy consumers for the next 10 years? How do the energy sources change? Predict only the top energy sources in the data. Predictive Time Series
 ```{r}
 
 ```
 
-# Task 8: Which countries have similar energy consumption habits over the past 20 years? Use unsupervised learning to segment the countries into logical groups. How many groups are there? Predicitve / Descriptive Segmentation
+## Task 8:
+Which countries have similar energy consumption habits over the past 20 years? Use unsupervised learning to segment the countries into logical groups. How many groups are there? Predicitve / Descriptive Segmentation
 ```{r}
 # unique(continents_data$country)
 #
@@ -287,19 +297,23 @@ filter_cols <- unlist(filter_cols)
 
 ```{r}
 countries_data <- countries_data %>%
-  select(filter_cols)
+  select(all_of(filter_cols))
 ```
 
 ```{r}
 scaled_data <- as.data.frame(scale(countries_data%>%select(-country,-year)))
+```
 
+
+```{r}
+scaled_data$country <- countries_data$country
 scaled_data[is.na(scaled_data)] <- 0
 ```
 
 ```{r}
-cluster <- kmeans(scaled_data, 3)
+cluster <- kmeans(scaled_data%>%select(-country), 3)
 
-kmeans(scaled_data,3)
+kmeans(scaled_data%>%select(-country),3)
 ```
 
 ```{r}
@@ -320,8 +334,11 @@ cluster$centers
 ```
 
 ```{r}
-library(tidyverse)
+scaled_data <- scaled_data%>%select(-country)
+```
 
+
+```{r}
 output <- map_dbl(1:10, function(k){
   model <- kmeans(x = scaled_data, centers = k)
   model$tot.withinss
@@ -338,16 +355,88 @@ ggplot(elbow_method, aes(x = k, y = centers_values)) +
 
 ```{r}
 
-library(factoextra)
-
 cluster <- kmeans(x=scaled_data, centers = 4)
+
+countries_data <- countries_data %>%
+  mutate(class = cluster$cluster)
 
 fviz_cluster(cluster, data = scaled_data)
 ```
 
+```{r}
+# cluster <- kmeans(x=scaled_data, centers = 6)
+# 
+# fviz_cluster(cluster, data = scaled_data)
+```
+
+```{r}
+cluster_centers <- cluster$centers
+```
+
+## Explanation:
+A couple things to keep in mind here. 
+
+All components of the kmeans model can be called off the model itself with a dollar sign, and each component is explained below.
+
+Cluster: Is the class that the algorithm has assigned to the specific entry of the data.
+
+Centers: Is the center of that classes cluster for that attribute in n-dimensional space.
+
+Totss: Stands for the Total Sum of Squares. In short this is the sum of the differences of each sample from the mean of the population, squared. 
+
+Withinss: Stands for the Within Sum of Squares. This tells us how much variation is in each cluster. If you have 4 clusters there should be 4 values. A smaller value indicates a more tightly grouped cluster. 
+
+Tot.withinss: Is the total sum of squares within sum of squares. This is how we determine the ideal number of groups for our algorithm, and is the sum of the 4 values for withinss. The smaller the variation amongst the individual clusters the more likely they are similiar to each other. 
+
+Betweenss: totss - tot.withinss, this tells us the distance between the clusters. Can be useful if we have clusters that are close together. 
+
+Size: The number of points in each cluster. 
 
 
+## How to leverage this analysis
+Now that we have this created, what can we do with it?
+1) What are the characteristics of each class? 
 
+```{r}
+
+agg_class <- countries_data %>%
+  group_by(class) %>%
+  summarise(energy_avg = mean(energy_per_capita,na.rm = TRUE),
+            renewable_avg = mean(renewables_energy_per_capita, na.rm = TRUE),
+            non_renewable_avg = mean(fossil_energy_per_capita, na.rm = TRUE))
+  
+ggplot(data = agg_class,aes(x=class,y=energy_avg)) +
+         geom_col(fill='blue',color='black') +
+  labs(title = 'Energy Consumption by Class')
+
+ggplot(data = agg_class, aes(x=class,renewable_avg)) +
+  geom_col(fill = 'green', color='black') + 
+  labs(title = 'Renewable Energy Consumption by Class')
+
+ggplot(data = agg_class, aes(x=class, non_renewable_avg)) +
+  geom_col(fill='red',color='black') +
+  labs(title = 'Non-Renewable Energy Consumption by Class')
+
+
+```
+
+
+```{r}
+class_3 <- filter(countries_data,class==3)
+
+class_3 %>%
+  group_by(country) %>%
+  count()
+
+countries_data %>%
+  group_by(country) %>%
+  count()
+```
+
+
+```{r}
+cor(countries_data$coal_prod_per_capita, countries_data$energy_per_capita,use = 'complete.obs', method='pearson')
+```
 
 
 
